@@ -1,1 +1,1 @@
-.flaskenv 
+FLASK_APP=journal.py
