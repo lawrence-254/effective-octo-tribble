@@ -21,11 +21,28 @@ def index():
     return render_template('index.html', title='Home', user=user, posts=posts)
 
 
-@app.route('/register')
+@app.route('/register', methods=['POST'])
 def register():
     form = RegisterForm()
+    if form.validate_on_submit():
+        hashed_password = generate_password_hash(form.password.data)
+        new_user = User(
+            username=form.username.data,
+            email=form.email.data,
+            hashed_password=hashed_password
+        )
+        try:
+            db.session.add(new_user)
+            db.session.commit()
+            flash('Registration successful! You can now log in.', 'success')
+            return redirect(url_for('login'))
+        except Exception as e:
+            db.session.rollback()
+            flash('Error: User already exists.', 'danger')
+            return redirect(url_for('register'))
 
     return render_template('register.html', title='REGISTER', form=form)
+
 
 @app.route('/login')
 def login():
