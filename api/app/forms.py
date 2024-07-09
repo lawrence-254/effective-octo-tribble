@@ -62,9 +62,12 @@ includes:
 '''category class form'''
 class CategoryForm(FlaskForm):
     category = StringField('Category', validators=[DataRequired()])
+    submit=SubmitField('Enter Category')
 
 '''journal form class'''
 class JournalEntryForm(FlaskForm):
-    pass
-
+    title = StringField('Title', validators=[DataRequired(), Length(max=120)])
+    content = TextAreaField('Content', validators=[DataRequired()])
+    category = SelectField('Category', coerce=int, validators=[DataRequired()])
+    submit = SubmitField('Submit')
 
