@@ -14,7 +14,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db =  SQLAlchemy(app)
 migrate = Migrate(app, db)
 
- '''auth functions'''
+'''auth functions'''
 jwt = JWTManager(app)
 
 from app import routes, models

@@ -1,14 +1,15 @@
-from app import app
-from flask import render_template
+from flask import render_template, redirect, url_for, flash, session
+from werkzeug.security import generate_password_hash, check_password_hash
+from app import app, db
 from app.forms import RegisterForm, LoginForm
-
+from app.models import User
 
 @app.route('/')
 @app.route('/index')
 def index():
-    user = {'username' : 'mozart'}
+    user = {'username': 'mozart'}
     posts = [
-     {
+        {
             'author': {'username': 'John'},
             'body': 'Beautiful day in Portland!'
         },
@@ -17,11 +18,9 @@ def index():
             'body': 'The Avengers movie was so cool!'
         }
     ]
-#     return jsonify({'title': 'Home', 'user': user, 'posts': posts})
     return render_template('index.html', title='Home', user=user, posts=posts)
 
-
-@app.route('/register', methods=['POST'])
+@app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
@@ -43,12 +42,28 @@ def register():
 
     return render_template('register.html', title='REGISTER', form=form)
 
-
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    form=LoginForm()
+    if 'user_id' in session:
+        return redirect(url_for('index'))
+
+    form = LoginForm()
     if form.validate_on_submit():
-        flash('Login requested for user {}, remember_me={}'.format(
-            form.username.data, form.remember_me.data))
-        return redirect('/index')
+        user = User.query.filter_by(username=form.username.data).first()
+        if user and check_password_hash(user.hashed_password, form.password.data):
+            session['user_id'] = user.id
+            session['username'] = user.username
+            flash('Login successful!', 'success')
+            return redirect(url_for('index'))
+        else:
+            flash('Invalid username or password.', 'danger')
+
     return render_template('login.html', title='LOGIN', form=form)
+
+@app.route('/logout')
+def logout():
+    session.pop('user_id', None)
+    session.pop('username', None)
+    flash('You have been logged out.', 'success')
+    return redirect(url_for('index'))
+
