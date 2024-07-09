@@ -64,6 +64,7 @@ class CategoryForm(FlaskForm):
     category = StringField('Category', validators=[DataRequired()])
 
 '''journal form class'''
-class JournalEntryForm(FlaskForm)
+class JournalEntryForm(FlaskForm):
+    pass
 
 

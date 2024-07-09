@@ -1,0 +1,17 @@
+<!doctype html>
+<html>
+<head>
+    <title>{{ title }}</title>
+</head>
+<body>
+    <h1>Reset Username</h1>
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.new_username.label }}<br>
+            {{ form.new_username(size=32) }}<br>
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+</body>
+</html>

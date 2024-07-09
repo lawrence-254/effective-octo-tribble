@@ -3,9 +3,13 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from app import app, db
 from app.forms import RegisterForm, LoginForm, ResetUsernameForm, ResetEmailForm, ResetPasswordForm
 from app.models import User
+from app.utils import login_required
+
+
 
 @app.route('/')
 @app.route('/index')
+@login_required
 def index():
     user = {'username': 'mozart'}
     posts = [
@@ -61,6 +65,7 @@ def login():
     return render_template('login.html', title='LOGIN', form=form)
 
 @app.route('/logout')
+@login_required
 def logout():
     session.pop('user_id', None)
     session.pop('username', None)
@@ -69,6 +74,7 @@ def logout():
 
 
 @app.route('/reset_username', methods=['GET', 'POST'])
+@login_required
 def reset_username():
     if 'user_id' not in session:
         flash('You need to be logged in to reset your username.', 'danger')
@@ -85,6 +91,7 @@ def reset_username():
     return render_template('reset_username.html', title='Reset Username', form=form)
 
 @app.route('/reset_email', methods=['GET', 'POST'])
+@login_required
 def reset_email():
     if 'user_id' not in session:
         flash('You need to be logged in to reset your email.', 'danger')
@@ -101,6 +108,7 @@ def reset_email():
     return render_template('reset_email.html', title='Reset Email', form=form)
 
 @app.route('/reset_password', methods=['GET', 'POST'])
+@login_required
 def reset_password():
     if 'user_id' not in session:
         flash('You need to be logged in to reset your password.', 'danger')
