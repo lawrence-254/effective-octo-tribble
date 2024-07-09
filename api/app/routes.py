@@ -11,18 +11,8 @@ from app.utils import login_required
 @app.route('/index')
 @login_required
 def index():
-    user = {'username': 'mozart'}
-    posts = [
-        {
-            'author': {'username': 'John'},
-            'body': 'Beautiful day in Portland!'
-        },
-        {
-            'author': {'username': 'Susan'},
-            'body': 'The Avengers movie was so cool!'
-        }
-    ]
-    return render_template('index.html', title='Home', user=user, posts=posts)
+    user = User.query.get(session['user_id'])
+    return render_template('index.html', title='Home', user=user)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -148,26 +138,6 @@ def delete_category(category_id):
     db.session.commit()
     flash('Category deleted successfully!', 'success')
     return redirect(url_for('categories'))
-#
-# @app.route('/journal_entries', methods=['GET', 'POST'])
-# @login_required
-# def journal_entries():
-#     form = JournalEntryForm()
-#     form.category.choices = [(category.id, category.name) for category in Category.query.all()]
-#     if form.validate_on_submit():
-#         new_entry = JournalEntry(
-#             title=form.title.data,
-#             content=form.content.data,
-#             category_id=form.category.data,
-#             user_id=session['user_id']
-#         )
-#         db.session.add(new_entry)
-#         db.session.commit()
-#         flash('Journal entry created successfully!', 'success')
-#         return redirect(url_for('journal_entries'))
-#
-#     journal_entries = JournalEntry.query.filter_by(user_id=session['user_id']).all()
-#     return render_template('journal_entries.html', title='Journal Entries', form=form, journal_entries=journal_entries)
 
 @app.route('/journal_entries', methods=['GET', 'POST'])
 @login_required
