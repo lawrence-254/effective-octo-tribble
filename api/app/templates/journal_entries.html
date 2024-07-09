@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{ title }}</title>
+  </head>
+  <body>
+    <h1>Manage Journal Entries</h1>
+    <form method="POST" action="{{ url_for('manage_journal_entries') }}">
+      {{ form.hidden_tag() }}
+      <div>
+        {{ form.title.label }}<br>
+        {{ form.title(size=32) }}<br>
+        {% for error in form.title.errors %}
+          <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+      </div>
+      <div>
+        {{ form.content.label }}<br>
+        {{ form.content(rows=5, cols=32) }}<br>
+        {% for error in form.content.errors %}
+          <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+      </div>
+      <div>
+        {{ form.category.label }}<br>
+        {{ form.category() }}<br>
+        {% for error in form.category.errors %}
+          <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+      </div>
+      <div>
+        {{ form.submit() }}
+      </div>
+    </form>
+    <ul>
+      {% for entry in journal_entries %}
+        <li>{{ entry.title }} - {{ entry.content }} - {{ entry.category.name }}</li>
+      {% endfor %}
+    </ul>
+  </body>
+</html>

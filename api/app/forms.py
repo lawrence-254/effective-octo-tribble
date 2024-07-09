@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
+from wtforms import StringField, TextAreaField, SelectField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Email, Length, EqualTo
 
 '''
@@ -61,7 +61,7 @@ includes:
 
 '''category class form'''
 class CategoryForm(FlaskForm):
-    category = StringField('Category', validators=[DataRequired()])
+    name = StringField('Category', validators=[DataRequired()])
     submit=SubmitField('Enter Category')
 
 '''journal form class'''
