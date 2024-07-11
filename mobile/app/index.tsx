@@ -4,11 +4,11 @@ import {Link} from 'expo-router'
 export default function Index() {
   return (
     <View style={styles.container}>
-      <Text className="text-3xl">Edit app/index.tsx to edit this screen.</Text>
       <Text>Welcome to journal</Text>
-      <Link href="/profile">profile</Link>
       <Link href="/login">LOGIN</Link>
       <Link href="/signup">SIGN UP</Link>
+      <Link href="/home">home</Link>
+
     </View>
   );
 }
