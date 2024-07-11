@@ -6,8 +6,8 @@ from app.models import User, Category, JournalEntry
 from app.utils import login_required
 
 # Index/home route
-@app.route('/')
-@app.route('/index')
+@app.route('/api/v1/')
+@app.route('/api/v1/index')
 @login_required
 def index():
     user = User.query.get(session['user_id'])
@@ -23,7 +23,7 @@ def index():
 
 # Registration route
 
-@app.route('/register', methods=['POST'])
+@app.route('/api/v1/register', methods=['POST'])
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
@@ -43,7 +43,7 @@ def register():
     return jsonify({'error': 'Invalid data submitted.'}), 400
 
 # Login route
-@app.route('/login', methods=['POST'])
+@app.route('/api/v1/login', methods=['POST'])
 def login():
     if 'user_id' in session:
         return jsonify({'message': 'Already logged in.'}), 200
@@ -61,7 +61,7 @@ def login():
 
 
 # Logout route
-@app.route('/logout', methods=['POST'])
+@app.route('/api/v1/logout', methods=['POST'])
 @login_required
 def logout():
     session.pop('user_id', None)
@@ -69,7 +69,7 @@ def logout():
     return jsonify({'message': 'Logout successful.'}), 200
 
 # Reset username route
-@app.route('/reset_username', methods=['POST'])
+@app.route('/api/v1/reset_username', methods=['POST'])
 @login_required
 def reset_username():
     form = ResetUsernameForm()
@@ -81,7 +81,7 @@ def reset_username():
     return jsonify({'error': 'Invalid data submitted.'}), 400
 
 # Reset email route
-@app.route('/reset_email', methods=['POST'])
+@app.route('/api/v1/reset_email', methods=['POST'])
 @login_required
 def reset_email():
     form = ResetEmailForm()
@@ -93,7 +93,7 @@ def reset_email():
     return jsonify({'error': 'Invalid data submitted.'}), 400
 
 # Reset password route
-@app.route('/reset_password', methods=['POST'])
+@app.route('/api/v1/reset_password', methods=['POST'])
 @login_required
 def reset_password():
     form = ResetPasswordForm()
@@ -105,7 +105,7 @@ def reset_password():
     return jsonify({'error': 'Invalid data submitted.'}), 400
 
 # Manage categories route
-@app.route('/categories', methods=['GET', 'POST'])
+@app.route('/api/v1/categories', methods=['GET', 'POST'])
 @login_required
 def manage_categories():
     if request.method == 'POST':
@@ -122,7 +122,7 @@ def manage_categories():
         return jsonify([category.serialize() for category in categories]), 200
 
 # Delete category route
-@app.route('/categories/<int:category_id>/delete', methods=['DELETE'])
+@app.route('/api/v1/categories/<int:category_id>/delete', methods=['DELETE'])
 @login_required
 def delete_category(category_id):
     category = Category.query.get_or_404(category_id)
@@ -131,7 +131,7 @@ def delete_category(category_id):
     return jsonify({'message': 'Category deleted successfully!'}), 200
 
 # Manage journal entries route
-@app.route('/journal_entries', methods=['GET', 'POST'])
+@app.route('/api/v1/journal_entries', methods=['GET', 'POST'])
 @login_required
 def manage_journal_entries():
     if request.method == 'POST':
@@ -153,7 +153,7 @@ def manage_journal_entries():
         return jsonify([entry.serialize() for entry in journal_entries]), 200
 
 # Delete journal entry route
-@app.route('/journal_entries/<int:entry_id>/delete', methods=['DELETE'])
+@app.route('/api/v1/journal_entries/<int:entry_id>/delete', methods=['DELETE'])
 @login_required
 def delete_journal_entry(entry_id):
     entry = JournalEntry.query.get_or_404(entry_id)
@@ -164,7 +164,7 @@ def delete_journal_entry(entry_id):
     return jsonify({'message': 'Journal entry deleted successfully!'}), 200
 
 # Edit journal entry route
-@app.route('/journal_entries/<int:entry_id>/edit', methods=['PUT'])
+@app.route('/api/v1/journal_entries/<int:entry_id>/edit', methods=['PUT'])
 @login_required
 def edit_journal_entry(entry_id):
     entry = JournalEntry.query.get_or_404(entry_id)

@@ -14,6 +14,8 @@ app and database migrations
 app = Flask(__name__)
 app.config.from_object(Config)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+from flask_cors import CORS
+CORS(app)
 '''..............'''
 csrf = CSRFProtect(app)
 db =  SQLAlchemy(app)
