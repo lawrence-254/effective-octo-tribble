@@ -1,9 +1,11 @@
 import { ScrollView, Text, View, StyleSheet, Alert } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FormField from '../../components/FormField';
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import CustomButton from '../../components/CustomButton';
 import { Link } from 'expo-router';
+import {AuthProvider, AuthContext} from '../../context/AuthContext'
+
 
 interface FormState {
     email: string;
@@ -11,28 +13,6 @@ interface FormState {
     password: string;
     confirm_password: string;
 }
-
-const submitChange = async (formData: Partial<FormState>) => {
-    try {
-        const response = await fetch('http://localhost:5000/api/v1/register', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formData),
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-            Alert.alert('Success', 'Registration successful.');
-        } else {
-            Alert.alert('Error', result.message || 'Something went wrong.');
-        }
-    } catch (error) {
-        Alert.alert('Error', 'Failed to submit changes.');
-    }
-};
 
 const SignUp: React.FC = () => {
     const [form, setForm] = useState<FormState>({
@@ -42,22 +22,10 @@ const SignUp: React.FC = () => {
         confirm_password: ''
     });
     const [isLoading, setIsLoading] = useState(false);
+    const val = useContext(AuthContext)
 
-    const handleSubmit = async () => {
-        if (!form.email || !form.username || !form.password || !form.confirm_password) {
-            Alert.alert('Error', 'Please fill in all fields.');
-            return;
+    const handleSubmit=()=>{
         }
-
-        if (form.password !== form.confirm_password) {
-            Alert.alert('Error', 'Passwords do not match.');
-            return;
-        }
-
-        setIsLoading(true);
-        await submitChange(form);
-        setIsLoading(false);
-    };
 
     return (
         <SafeAreaView style={styles.container}>

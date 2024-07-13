@@ -2,10 +2,12 @@ import { View, Text } from 'react-native';
 import React from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import {AuthProvider} from '../../context/AuthContext'
+
 
 const AuthLayout: React.FC = () => {
     return (
-        <>
+        <AuthProvider>
         <Stack>
         <Stack.Screen
         name="login"
@@ -21,7 +23,7 @@ const AuthLayout: React.FC = () => {
         />
         </Stack>
         <StatusBar backgroundColor="#4C6B4C" style="dark" />
-        </>
+        </AuthProvider>
     );
 };
 

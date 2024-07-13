@@ -5,10 +5,11 @@ from app.forms import RegisterForm, LoginForm, ResetUsernameForm, ResetEmailForm
 from app.models import User, Category, JournalEntry
 from app.utils import login_required
 
+
 # Index/home route
 @app.route('/api/v1/')
 @app.route('/api/v1/index')
-@login_required
+# @login_required
 def index():
     user = User.query.get(session['user_id'])
     return jsonify({
@@ -25,7 +26,7 @@ def index():
 
 @app.route('/api/v1/register', methods=['POST'])
 def register():
-    form = RegisterForm()
+    form = RegisterForm(data=request.json)
     if form.validate_on_submit():
         hashed_password = generate_password_hash(form.password.data)
         new_user = User(
@@ -48,17 +49,21 @@ def login():
     if 'user_id' in session:
         return jsonify({'message': 'Already logged in.'}), 200
 
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
-        if user and check_password_hash(user.hashed_password, form.password.data):
-            session['user_id'] = user.id
-            session['username'] = user.username
-            return jsonify({'message': 'Login successful!'}), 200
-        else:
-            return jsonify({'error': 'Invalid username or password.'}), 401
-    return jsonify({'error': 'Invalid data submitted.'}), 400
+    data = request.get_json()
+    print("Received data:", data)
+    username = data.get('username')
+    password = data.get('password')
 
+    if not username or not password:
+        return jsonify({'error': 'Username and password are required.'}), 400
+
+    user = User.query.filter_by(username=username).first()
+    if user and check_password_hash(user.hashed_password, password):
+        session['user_id'] = user.id
+        session['username'] = user.username
+        return jsonify({'message': 'Login successful!'}), 200
+    else:
+        return jsonify({'error': 'Invalid username or password.'}), 401
 
 # Logout route
 @app.route('/api/v1/logout', methods=['POST'])

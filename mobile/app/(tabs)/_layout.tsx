@@ -2,6 +2,7 @@ import { View, Text } from 'react-native';
 import React from 'react';
 import { Tabs } from 'expo-router';
 import Icon from 'react-native-vector-icons/Ionicons';
+import {AuthProvider} from '../../context/AuthContext'
 
 const ICON_SIZE = 30;
 
@@ -29,7 +30,7 @@ const TabIcon = ({ IconComponent, color, size }) => {
 
 const TabsLayout = () => {
     return (
-        <>
+        <AuthProvider>
         <Tabs
         screenOptions={{
             tabBarActiveTintColor: 'teal',
@@ -82,7 +83,7 @@ const TabsLayout = () => {
         }}
         />
         </Tabs>
-        </>
+        </AuthProvider>
     );
 };
 

@@ -18,6 +18,7 @@ from flask_cors import CORS
 CORS(app)
 '''..............'''
 csrf = CSRFProtect(app)
+csrf.init_app(app)
 db =  SQLAlchemy(app)
 migrate = Migrate(app, db)
 

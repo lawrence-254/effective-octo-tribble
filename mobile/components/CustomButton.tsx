@@ -12,7 +12,10 @@ interface CustomButtonProps {
 const CustomButton: React.FC<CustomButtonProps> = ({ title, handlePress, containerStyles, textStyles, isLoading }) => {
     return (
         <TouchableOpacity
-        onPress={handlePress}
+        onPress={() => {
+            console.log('Button pressed');
+            handlePress();
+        }}
         activeOpacity={0.8}
         style={[styles.button, containerStyles]}
         >
@@ -40,3 +43,4 @@ const styles = StyleSheet.create({
 });
 
 export default CustomButton;
+
