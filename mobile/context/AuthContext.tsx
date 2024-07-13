@@ -25,6 +25,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
           const res = await axios.get(`${BASE_URL}/get-csrf-token`);
           setCsrfToken(res.data.csrf_token);
+          console.log(res.data.csrf_token)
         } catch (e) {
           console.log('Error fetching CSRF token', e);
         }
@@ -35,12 +36,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const register = async (username: string, email: string, password: string, confirm_password: string) => {
         if (!csrfToken) {
             console.log('CSRF token is not set.');
-            return;
+            throw new Error('CSRF token is missing');
         }
 
         try {
             console.log(`Registering user: ${username}`);
-            const res = await axios.post(`${BASE_URL}/v1/register`, {
+            const res = await axios.post(`${BASE_URL}/register`, {
                 username, email, password, confirm_password
             }, {
                 headers: {
@@ -50,11 +51,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
             console.log(`Response from server:`, res.data);
             setAuthValue(`Registered ${username}`);
-        } catch (e) {
-            console.log('Error while registering', e.response ? e.response.data : e.message);
-            throw e;
+            return res.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                if (error.response) {
+                    console.error('Server responded with error:', error.response.data);
+                    throw new Error(`Registration failed: ${error.response.data.message || error.response.statusText}`);
+                } else if (error.request) {
+                    console.error('No response received:', error.request);
+                    throw new Error('No response from server. Please check your connection.');
+                } else {
+                    console.error('Error setting up request:', error.message);
+                    throw new Error('An error occurred while setting up the request.');
+                }
+            } else {
+                console.error('Unexpected error:', error);
+                throw new Error('An unexpected error occurred');
+            }
         }
     };
+
 
   const login = (email: string, password: string) => {
       console.log(`Logging in user with username: ${username}`);
