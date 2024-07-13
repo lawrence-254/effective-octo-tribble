@@ -1,38 +1,21 @@
-import { ScrollView, Text, View, StyleSheet } from "react-native";
+import { ScrollView, Text, View, StyleSheet, Alert } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FormField from '../../components/FormField';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import CustomButton from '../../components/CustomButton';
 import { Link } from 'expo-router';
-
-
 
 interface FormState {
     username: string;
     password: string;
 }
-const submitChange = async (formData: Partial<{ email: string, username: string; password: string, confirm_password: string }>) => {
-    try {
-        const response = await fetch('https://your-backend-endpoint.com/api/v1/submit', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formData),
-        });
 
-        const result = await response.json();
-
-        if (response.ok) {
-            Alert.alert('Success', 'Your changes have been submitted successfully.');
-        } else {
-            Alert.alert('Error', result.message || 'Something went wrong.');
-        }
-    } catch (error) {
-        Alert.alert('Error', 'Failed to submit changes.');
-    }
+const fetchCsrfToken = async () => {
+    const response = await fetch('http://localhost:5000/api/v1/csrf-token');
+    const data = await response.json();
+    console.log(data);
+    return data.csrf_token;
 };
-
 
 const Login: React.FC = () => {
     const [form, setForm] = useState<FormState>({
@@ -40,11 +23,69 @@ const Login: React.FC = () => {
         password: ''
     });
     const [isLoading, setIsLoading] = useState(false);
+    const [csrfToken, setCsrfToken] = useState<string | null>(null);
+
+    useEffect(() => {
+        const getCsrfToken = async () => {
+            const token = await fetchCsrfToken();
+            setCsrfToken(token);
+        };
+
+        getCsrfToken();
+    }, []);
 
     const handleSubmit = async () => {
         setIsLoading(true);
-        await submitChange(form);
-        setIsLoading(false);
+
+        if (!form.username || !form.password) {
+            Alert.alert('Error', 'Please fill in both fields.');
+            setIsLoading(false);
+            return;
+        }
+
+        if (!csrfToken) {
+            Alert.alert('Error', 'CSRF token not available. Please try again.');
+            setIsLoading(false);
+            return;
+        }
+
+        console.log(form);
+        try {
+            await submitChange(form, csrfToken);
+        } catch (error) {
+            console.error('Error during submission:', error);
+            Alert.alert('Error', 'Failed to submit changes.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const submitChange = async (formData: FormState, csrfToken: string) => {
+        try {
+            const response = await fetch('http://localhost:5000/api/v1/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': csrfToken,
+                },
+                body: JSON.stringify(formData),
+            });
+
+            const text = await response.text();
+            console.log('Raw response:', text);
+            if (!response.ok) {
+                const result = JSON.parse(text);
+                Alert.alert('Error', result.error || 'Something went wrong.');
+                return;
+            }
+
+            const result = JSON.parse(text);
+            console.log(result);
+            Alert.alert('Success', 'Login successful!');
+        } catch (error) {
+            console.error('Submit Error:', error);
+            Alert.alert('Error', 'Failed to submit changes.');
+        }
     };
 
     return (
@@ -66,15 +107,15 @@ const Login: React.FC = () => {
     onChangeText={(text) => setForm({ ...form, password: text })}
     isPassword={true}
     />
-<CustomButton
-title='LOGIN'
-    onPress={handleSubmit}
-/>
-<Text>Don't have an account? <Link href="/signup">
-<Text style={styles.linkText}>REGISTER</Text>
-</Link>
-</Text>
-
+    <CustomButton
+    title={isLoading ? 'LOADING...' : 'LOGIN'}
+    handlePress={handleSubmit}
+    containerStyles={{ opacity: isLoading ? 0.6 : 1 }}
+    disabled={isLoading}
+    />
+    <Text>Don't have an account? <Link href="/signup">
+    <Text style={styles.linkText}>REGISTER</Text>
+    </Link></Text>
     </View>
     </ScrollView>
     </SafeAreaView>
@@ -88,10 +129,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    linkText:{
-        color: 'yellow'
+    linkText: {
+        color: 'orange'
     },
 });
 
 export default Login;
+
 

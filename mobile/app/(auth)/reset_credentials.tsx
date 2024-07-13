@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScrollView, Text, View, StyleSheet, Button } from 'react-native';
+import { ScrollView, Text, View, StyleSheet, Button, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FormField from '../../components/FormField';
 import CustomButton from '../../components/CustomButton';
@@ -21,7 +21,7 @@ const ResetPassword = () => {
 
     const submitChange = async (formData: {  password: string, confirm_password: string }) => {
         try {
-            const response = await fetch('https://your-backend-endpoint.com/api/v1/submit', {
+            const response = await fetch('http://localhost:5000/api/v1/reset_password', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -67,7 +67,10 @@ const ResetPassword = () => {
     onChangeText={(text) => setForm({ ...form, confirm_password: text })}
     isPassword={true}
     />
-    <CustomButton title="Submit" onPress={() => {handleSubmit}} />
+    <CustomButton title="Submit" handlePress={() => {handleSubmit}}
+    containerStyles={{ opacity: isLoading ? 0.6 : 1 }}
+    disabled={isLoading}
+    />
     </View>
     </ScrollView>
     </SafeAreaView>
@@ -82,7 +85,7 @@ const ResetUsername = () => {
     const [isLoading, setIsLoading] = useState(false);
     const submitChange = async (formData: {  username: string; }) => {
         try {
-            const response = await fetch('https://your-backend-endpoint.com/api/v1/submit', {
+            const response = await fetch('http://localhost:5000/api/v1/reset_username', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -119,7 +122,10 @@ const ResetUsername = () => {
     placeholder='Enter Username'
     onChangeText={(text) => setForm({ ...form, username: text })}
     />
-    <CustomButton title="Submit" onPress={() => {handleSubmit}} />
+    <CustomButton title="Submit" handlePress={() => {handleSubmit}}
+    containerStyles={{ opacity: isLoading ? 0.6 : 1 }}
+    disabled={isLoading}
+    />
     </View>
     </ScrollView>
     </SafeAreaView>
@@ -133,7 +139,7 @@ const ResetEmail = () => {
     const [isLoading, setIsLoading] = useState(false);
     const submitChange = async (formData: { email: string }) => {
         try {
-            const response = await fetch('https://your-backend-endpoint.com/api/v1/submit', {
+            const response = await fetch('http://localhost:5000/api/v1/reset_email', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -171,7 +177,10 @@ const ResetEmail = () => {
     onChangeText={(text) => setForm({ ...form, email: text })}
     keyboardType="email-address"
     />
-    <CustomButton title="Submit" onPress={() => {handleSubmit}} />
+    <CustomButton title="Submit" handlePress={() => {handleSubmit}}
+    containerStyles={{ opacity: isLoading ? 0.6 : 1 }}
+    disabled={isLoading}
+    />
     </View>
     </ScrollView>
     </SafeAreaView>

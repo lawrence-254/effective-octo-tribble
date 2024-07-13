@@ -1,11 +1,9 @@
-import { ScrollView, Text, View, StyleSheet } from "react-native";
+import { ScrollView, Text, View, StyleSheet, Alert } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FormField from '../../components/FormField';
 import React, { useState } from 'react';
 import CustomButton from '../../components/CustomButton';
 import { Link } from 'expo-router';
-
-
 
 interface FormState {
     email: string;
@@ -13,9 +11,10 @@ interface FormState {
     password: string;
     confirm_password: string;
 }
-const submitChange = async (formData: Partial<{ email: string, username: string; password: string, confirm_password: string }>) => {
+
+const submitChange = async (formData: Partial<FormState>) => {
     try {
-        const response = await fetch('https://your-backend-endpoint.com/api/v1/submit', {
+        const response = await fetch('http://localhost:5000/api/v1/register', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -26,7 +25,7 @@ const submitChange = async (formData: Partial<{ email: string, username: string;
         const result = await response.json();
 
         if (response.ok) {
-            Alert.alert('Success', 'Your changes have been submitted successfully.');
+            Alert.alert('Success', 'Registration successful.');
         } else {
             Alert.alert('Error', result.message || 'Something went wrong.');
         }
@@ -35,17 +34,26 @@ const submitChange = async (formData: Partial<{ email: string, username: string;
     }
 };
 
-
 const SignUp: React.FC = () => {
     const [form, setForm] = useState<FormState>({
-        email:'',
+        email: '',
         username: '',
         password: '',
-        confirm_password:''
+        confirm_password: ''
     });
     const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = async () => {
+        if (!form.email || !form.username || !form.password || !form.confirm_password) {
+            Alert.alert('Error', 'Please fill in all fields.');
+            return;
+        }
+
+        if (form.password !== form.confirm_password) {
+            Alert.alert('Error', 'Passwords do not match.');
+            return;
+        }
+
         setIsLoading(true);
         await submitChange(form);
         setIsLoading(false);
@@ -60,12 +68,11 @@ const SignUp: React.FC = () => {
         label='Email'
     value={form.email}
     placeholder='Enter Email'
-    secureTextEntry={true}
     onChangeText={(text) => setForm({ ...form, email: text })}
-    keyboardType="email"
+    keyboardType="email-address"
     />
-        <FormField
-        label='User Name'
+    <FormField
+    label='User Name'
     value={form.username}
     placeholder='Enter Username'
     onChangeText={(text) => setForm({ ...form, username: text })}
@@ -77,7 +84,8 @@ const SignUp: React.FC = () => {
     secureTextEntry={true}
     onChangeText={(text) => setForm({ ...form, password: text })}
     isPassword={true}
-    />  <FormField
+    />
+    <FormField
     label='Confirm Password'
     value={form.confirm_password}
     placeholder='Confirm Password'
@@ -86,13 +94,14 @@ const SignUp: React.FC = () => {
     isPassword={true}
     />
     <CustomButton
-    title='REGISTER'
-    onPress={handleSubmit}
+    title={isLoading ? 'LOADING...' : 'REGISTER'}
+    handlePress={handleSubmit}
+    containerStyles={{ opacity: isLoading ? 0.6 : 1 }}
+    disabled={isLoading}
     />
     <Text>Have an account? <Link href="/login">
     <Text style={styles.linkText}>LOGIN</Text>
-    </Link>
-    </Text>
+    </Link></Text>
     </View>
     </ScrollView>
     </SafeAreaView>
@@ -106,8 +115,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    linkText:{
-        color: 'yellow'
+    linkText: {
+        color: 'orange'
     }
 });
 
