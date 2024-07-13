@@ -5,6 +5,15 @@ from app.forms import RegisterForm, LoginForm, ResetUsernameForm, ResetEmailForm
 from app.models import User, Category, JournalEntry
 from app.utils import login_required
 
+from flask import session
+
+@app.route('/get-csrf-token', methods=['GET'])
+def get_csrf_token():
+    token = session.get('_csrf_token')
+    if token is None:
+        token = csrf.generate_csrf()
+    return jsonify({'csrf_token': token})
+
 
 # Index/home route
 @app.route('/api/v1/')
