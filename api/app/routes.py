@@ -1,18 +1,19 @@
 from flask import render_template, redirect, url_for, flash, session, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
-from app import app, db
+from app import app, csrf, db
 from app.forms import RegisterForm, LoginForm, ResetUsernameForm, ResetEmailForm, ResetPasswordForm, JournalEntryForm, CategoryForm
 from app.models import User, Category, JournalEntry
 from app.utils import login_required
 
-from flask import session
-
-@app.route('/get-csrf-token', methods=['GET'])
+@app.route('/api/v1/get-csrf-token', methods=['GET'])
 def get_csrf_token():
-    token = session.get('_csrf_token')
-    if token is None:
+    try:
         token = csrf.generate_csrf()
-    return jsonify({'csrf_token': token})
+        session['_csrf_token'] = token
+        return jsonify({'csrf_token': token})
+    except Exception as e:
+        app.logger.error(f"Error generating CSRF token: {e}")
+        return jsonify({'error': 'Failed to generate CSRF token'}), 500
 
 
 # Index/home route
