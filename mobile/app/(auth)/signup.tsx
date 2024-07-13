@@ -3,6 +3,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import FormField from '../../components/FormField';
 import React, { useState } from 'react';
 import CustomButton from '../../components/CustomButton';
+import { Link } from 'expo-router';
+
 
 
 interface FormState {
@@ -11,6 +13,28 @@ interface FormState {
     password: string;
     confirm_password: string;
 }
+const submitChange = async (formData: Partial<{ email: string, username: string; password: string, confirm_password: string }>) => {
+    try {
+        const response = await fetch('https://your-backend-endpoint.com/api/v1/submit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData),
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            Alert.alert('Success', 'Your changes have been submitted successfully.');
+        } else {
+            Alert.alert('Error', result.message || 'Something went wrong.');
+        }
+    } catch (error) {
+        Alert.alert('Error', 'Failed to submit changes.');
+    }
+};
+
 
 const SignUp: React.FC = () => {
     const [form, setForm] = useState<FormState>({
@@ -19,6 +43,13 @@ const SignUp: React.FC = () => {
         password: '',
         confirm_password:''
     });
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleSubmit = async () => {
+        setIsLoading(true);
+        await submitChange(form);
+        setIsLoading(false);
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -56,7 +87,12 @@ const SignUp: React.FC = () => {
     />
     <CustomButton
     title='REGISTER'
+    onPress={handleSubmit}
     />
+    <Text>Have an account? <Link href="/login">
+    <Text style={styles.linkText}>LOGIN</Text>
+    </Link>
+    </Text>
     </View>
     </ScrollView>
     </SafeAreaView>
@@ -70,6 +106,9 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
+    linkText:{
+        color: 'yellow'
+    }
 });
 
 export default SignUp;

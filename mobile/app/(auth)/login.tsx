@@ -3,18 +3,49 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import FormField from '../../components/FormField';
 import React, { useState } from 'react';
 import CustomButton from '../../components/CustomButton';
+import { Link } from 'expo-router';
+
 
 
 interface FormState {
     username: string;
     password: string;
 }
+const submitChange = async (formData: Partial<{ email: string, username: string; password: string, confirm_password: string }>) => {
+    try {
+        const response = await fetch('https://your-backend-endpoint.com/api/v1/submit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData),
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            Alert.alert('Success', 'Your changes have been submitted successfully.');
+        } else {
+            Alert.alert('Error', result.message || 'Something went wrong.');
+        }
+    } catch (error) {
+        Alert.alert('Error', 'Failed to submit changes.');
+    }
+};
+
 
 const Login: React.FC = () => {
     const [form, setForm] = useState<FormState>({
         username: '',
         password: ''
     });
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleSubmit = async () => {
+        setIsLoading(true);
+        await submitChange(form);
+        setIsLoading(false);
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -37,7 +68,13 @@ const Login: React.FC = () => {
     />
 <CustomButton
 title='LOGIN'
+    onPress={handleSubmit}
 />
+<Text>Don't have an account? <Link href="/signup">
+<Text style={styles.linkText}>REGISTER</Text>
+</Link>
+</Text>
+
     </View>
     </ScrollView>
     </SafeAreaView>
@@ -50,6 +87,9 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    linkText:{
+        color: 'yellow'
     },
 });
 

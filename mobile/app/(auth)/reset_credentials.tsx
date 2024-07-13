@@ -11,13 +11,40 @@ interface FormState {
     confirm_password: string;
 }
 
+
 const ResetPassword = () => {
     const [form, setForm] = useState<FormState>({
-        email: '',
-        username: '',
         password: '',
         confirm_password: '',
     });
+    const [isLoading, setIsLoading] = useState(false);
+
+    const submitChange = async (formData: {  password: string, confirm_password: string }) => {
+        try {
+            const response = await fetch('https://your-backend-endpoint.com/api/v1/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                Alert.alert('Success', 'Your changes have been submitted successfully.');
+            } else {
+                Alert.alert('Error', result.message || 'Something went wrong.');
+            }
+        } catch (error) {
+            Alert.alert('Error', 'Failed to submit changes.');
+        }
+    };
+    const handleSubmit = async () => {
+        setIsLoading(true);
+        await submitChange(form);
+        setIsLoading(false);
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -40,7 +67,7 @@ const ResetPassword = () => {
     onChangeText={(text) => setForm({ ...form, confirm_password: text })}
     isPassword={true}
     />
-    <CustomButton text="Submit" onPress={() => { /* Handle submit */ }} />
+    <CustomButton title="Submit" onPress={() => {handleSubmit}} />
     </View>
     </ScrollView>
     </SafeAreaView>
@@ -49,11 +76,37 @@ const ResetPassword = () => {
 
 const ResetUsername = () => {
     const [form, setForm] = useState<FormState>({
-        email: '',
         username: '',
-        password: '',
-        confirm_password: '',
+
     });
+    const [isLoading, setIsLoading] = useState(false);
+    const submitChange = async (formData: {  username: string; }) => {
+        try {
+            const response = await fetch('https://your-backend-endpoint.com/api/v1/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                Alert.alert('Success', 'Your changes have been submitted successfully.');
+            } else {
+                Alert.alert('Error', result.message || 'Something went wrong.');
+            }
+        } catch (error) {
+            Alert.alert('Error', 'Failed to submit changes.');
+        }
+    };
+
+    const handleSubmit = async () => {
+        setIsLoading(true);
+        await submitChange(form);
+        setIsLoading(false);
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -66,7 +119,7 @@ const ResetUsername = () => {
     placeholder='Enter Username'
     onChangeText={(text) => setForm({ ...form, username: text })}
     />
-    <CustomButton text="Submit" onPress={() => { /* Handle submit */ }} />
+    <CustomButton title="Submit" onPress={() => {handleSubmit}} />
     </View>
     </ScrollView>
     </SafeAreaView>
@@ -76,10 +129,35 @@ const ResetUsername = () => {
 const ResetEmail = () => {
     const [form, setForm] = useState<FormState>({
         email: '',
-        username: '',
-        password: '',
-        confirm_password: '',
     });
+    const [isLoading, setIsLoading] = useState(false);
+    const submitChange = async (formData: { email: string }) => {
+        try {
+            const response = await fetch('https://your-backend-endpoint.com/api/v1/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                Alert.alert('Success', 'Your changes have been submitted successfully.');
+            } else {
+                Alert.alert('Error', result.message || 'Something went wrong.');
+            }
+        } catch (error) {
+            Alert.alert('Error', 'Failed to submit changes.');
+        }
+    };
+
+    const handleSubmit = async () => {
+        setIsLoading(true);
+        await submitChange(form);
+        setIsLoading(false);
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -93,7 +171,7 @@ const ResetEmail = () => {
     onChangeText={(text) => setForm({ ...form, email: text })}
     keyboardType="email-address"
     />
-    <CustomButton text="Submit" onPress={() => { /* Handle submit */ }} />
+    <CustomButton title="Submit" onPress={() => {handleSubmit}} />
     </View>
     </ScrollView>
     </SafeAreaView>
