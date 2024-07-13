@@ -1,14 +1,15 @@
 from flask import render_template, redirect, url_for, flash, session, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
-from app import app, csrf, db
+from app import app, csrf, db, generate_csrf
 from app.forms import RegisterForm, LoginForm, ResetUsernameForm, ResetEmailForm, ResetPasswordForm, JournalEntryForm, CategoryForm
 from app.models import User, Category, JournalEntry
 from app.utils import login_required
 
+
 @app.route('/api/v1/get-csrf-token', methods=['GET'])
 def get_csrf_token():
     try:
-        token = csrf.generate_csrf()
+        token = generate_csrf()
         session['_csrf_token'] = token
         return jsonify({'csrf_token': token})
     except Exception as e:
@@ -37,6 +38,7 @@ def index():
 @app.route('/api/v1/register', methods=['POST'])
 def register():
     form = RegisterForm(data=request.json)
+
     if form.validate_on_submit():
         hashed_password = generate_password_hash(form.password.data)
         new_user = User(
@@ -44,14 +46,17 @@ def register():
             email=form.email.data,
             hashed_password=hashed_password
         )
+
         try:
             db.session.add(new_user)
             db.session.commit()
             return jsonify({'message': 'Registration successful! You can now log in.'}), 201
         except Exception as e:
             db.session.rollback()
-            return jsonify({'error': 'User already exists.'}), 400
-    return jsonify({'error': 'Invalid data submitted.'}), 400
+            return jsonify({'error': 'User already exists.', 'details': str(e)}), 400
+
+    return jsonify({'error': 'Invalid data submitted.', 'errors': form.errors}), 400
+
 
 # Login route
 @app.route('/api/v1/login', methods=['POST'])
