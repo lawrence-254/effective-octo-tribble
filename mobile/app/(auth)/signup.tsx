@@ -3,7 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import FormField from '../../components/FormField';
 import React, { useState, useContext } from 'react';
 import CustomButton from '../../components/CustomButton';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { AuthContext } from '../../context/AuthContext';
 
 interface FormState {
@@ -23,6 +23,8 @@ const SignUp: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const authContext = useContext(AuthContext);
     const { register } = authContext;
+    const router = useRouter();
+
 
     const handleRegister = async () => {
         const { email, username, password, confirm_password } = form;
@@ -48,7 +50,9 @@ const SignUp: React.FC = () => {
         try {
               await register(username, email, password, confirm_password);
               setIsLoading(false);
-              Alert.alert('Registration successful');
+              Alert.alert('Registration successful', 'You can now log in', [
+                  { text: 'OK', onPress: () => router.replace('/login') }
+                  ]);
             } catch (error) {
               setIsLoading(false);
               Alert.alert('Registration failed', error.response ? error.response.data.message : error.message);
