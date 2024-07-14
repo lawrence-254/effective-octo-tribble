@@ -14,6 +14,9 @@ including:
 registration class form
 '''
 class RegisterForm(FlaskForm):
+    class Meta:
+        csrf = False
+
     email = StringField('Email', validators=[DataRequired(), Email()])
     username = StringField('Username', validators=[DataRequired(), Length(min=6, max=12)])
     password = PasswordField('Password', validators=[DataRequired()])

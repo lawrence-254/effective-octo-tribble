@@ -1,28 +1,29 @@
-from flask import Flask, request, jsonify, session
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from flask import Flask
+from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
-from flask_wtf.csrf import CSRFProtect, generate_csrf
-from werkzeug.security import generate_password_hash, check_password_hash
+from flask_wtf import CSRFProtect
+from flask_cors import CORS
 from config import Config
 
-
-
-'''
-app and database migrations
-'''
+# Initialize the app
 app = Flask(__name__)
 app.config.from_object(Config)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-from flask_cors import CORS
+
+# Enable CORS
 CORS(app, resources={r"/api/*": {"origins": "*"}})
-'''..............'''
+
+# Initialize CSRF protection
 csrf = CSRFProtect(app)
-csrf.init_app(app)
-db =  SQLAlchemy(app)
+
+# Initialize the database and migration
+db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-'''auth functions'''
+# Initialize JWT
 jwt = JWTManager(app)
 
+# Import routes and models
 from app import routes, models
+

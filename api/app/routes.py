@@ -1,6 +1,6 @@
-from flask import render_template, redirect, url_for, flash, session, jsonify
+from flask import render_template, redirect, url_for, flash, session, jsonify, request
 from werkzeug.security import generate_password_hash, check_password_hash
-from app import app, csrf, db, generate_csrf
+from app import app, db, csrf
 from app.forms import RegisterForm, LoginForm, ResetUsernameForm, ResetEmailForm, ResetPasswordForm, JournalEntryForm, CategoryForm
 from app.models import User, Category, JournalEntry
 from app.utils import login_required
@@ -16,11 +16,9 @@ def get_csrf_token():
         app.logger.error(f"Error generating CSRF token: {e}")
         return jsonify({'error': 'Failed to generate CSRF token'}), 500
 
-
-# Index/home route
 @app.route('/api/v1/')
 @app.route('/api/v1/index')
-# @login_required
+@login_required
 def index():
     user = User.query.get(session['user_id'])
     return jsonify({
@@ -32,13 +30,10 @@ def index():
         }
     })
 
-
-# Registration route
-
 @app.route('/api/v1/register', methods=['POST'])
+@csrf.exempt
 def register():
     form = RegisterForm(data=request.json)
-
     if form.validate_on_submit():
         hashed_password = generate_password_hash(form.password.data)
         new_user = User(
@@ -46,7 +41,6 @@ def register():
             email=form.email.data,
             hashed_password=hashed_password
         )
-
         try:
             db.session.add(new_user)
             db.session.commit()
@@ -54,11 +48,8 @@ def register():
         except Exception as e:
             db.session.rollback()
             return jsonify({'error': 'User already exists.', 'details': str(e)}), 400
-
     return jsonify({'error': 'Invalid data submitted.', 'errors': form.errors}), 400
 
-
-# Login route
 @app.route('/api/v1/login', methods=['POST'])
 def login():
     if 'user_id' in session:
@@ -80,7 +71,6 @@ def login():
     else:
         return jsonify({'error': 'Invalid username or password.'}), 401
 
-# Logout route
 @app.route('/api/v1/logout', methods=['POST'])
 @login_required
 def logout():
@@ -88,7 +78,6 @@ def logout():
     session.pop('username', None)
     return jsonify({'message': 'Logout successful.'}), 200
 
-# Reset username route
 @app.route('/api/v1/reset_username', methods=['POST'])
 @login_required
 def reset_username():
@@ -100,7 +89,6 @@ def reset_username():
         return jsonify({'message': 'Username updated successfully!'}), 200
     return jsonify({'error': 'Invalid data submitted.'}), 400
 
-# Reset email route
 @app.route('/api/v1/reset_email', methods=['POST'])
 @login_required
 def reset_email():
@@ -112,7 +100,6 @@ def reset_email():
         return jsonify({'message': 'Email updated successfully!'}), 200
     return jsonify({'error': 'Invalid data submitted.'}), 400
 
-# Reset password route
 @app.route('/api/v1/reset_password', methods=['POST'])
 @login_required
 def reset_password():
@@ -124,7 +111,6 @@ def reset_password():
         return jsonify({'message': 'Password updated successfully!'}), 200
     return jsonify({'error': 'Invalid data submitted.'}), 400
 
-# Manage categories route
 @app.route('/api/v1/categories', methods=['GET', 'POST'])
 @login_required
 def manage_categories():
@@ -141,7 +127,6 @@ def manage_categories():
         categories = Category.query.all()
         return jsonify([category.serialize() for category in categories]), 200
 
-# Delete category route
 @app.route('/api/v1/categories/<int:category_id>/delete', methods=['DELETE'])
 @login_required
 def delete_category(category_id):
@@ -150,7 +135,6 @@ def delete_category(category_id):
     db.session.commit()
     return jsonify({'message': 'Category deleted successfully!'}), 200
 
-# Manage journal entries route
 @app.route('/api/v1/journal_entries', methods=['GET', 'POST'])
 @login_required
 def manage_journal_entries():
@@ -172,7 +156,6 @@ def manage_journal_entries():
         journal_entries = JournalEntry.query.filter_by(user_id=session['user_id']).all()
         return jsonify([entry.serialize() for entry in journal_entries]), 200
 
-# Delete journal entry route
 @app.route('/api/v1/journal_entries/<int:entry_id>/delete', methods=['DELETE'])
 @login_required
 def delete_journal_entry(entry_id):
@@ -183,7 +166,6 @@ def delete_journal_entry(entry_id):
     db.session.commit()
     return jsonify({'message': 'Journal entry deleted successfully!'}), 200
 
-# Edit journal entry route
 @app.route('/api/v1/journal_entries/<int:entry_id>/edit', methods=['PUT'])
 @login_required
 def edit_journal_entry(entry_id):
@@ -199,6 +181,3 @@ def edit_journal_entry(entry_id):
         db.session.commit()
         return jsonify({'message': 'Journal entry updated successfully!'}), 200
     return jsonify({'error': 'Invalid data submitted.'}), 400
-
-
-
