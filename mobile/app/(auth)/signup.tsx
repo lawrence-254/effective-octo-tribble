@@ -50,9 +50,7 @@ const SignUp: React.FC = () => {
         try {
               await register(username, email, password, confirm_password);
               setIsLoading(false);
-              Alert.alert('Registration successful', 'You can now log in', [
-                  { text: 'OK', onPress: () => router.replace('/login') }
-                  ]);
+              router.replace('/login')
             } catch (error) {
               setIsLoading(false);
               Alert.alert('Registration failed', error.response ? error.response.data.message : error.message);
