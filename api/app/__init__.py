@@ -16,6 +16,7 @@ CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # Initialize CSRF protection
 csrf = CSRFProtect(app)
+app.config['WTF_CSRF_ENABLED'] = False
 
 # Initialize the database and migration
 db = SQLAlchemy(app)
