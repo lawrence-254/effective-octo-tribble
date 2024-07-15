@@ -1,6 +1,7 @@
 import React, { createContext, ReactNode, useState } from 'react';
 import axios from 'axios'
 import {BASE_URL} from '../library/app'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 interface AuthContextType {
   value: string;
@@ -54,21 +55,45 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const login = async (username: string, password: string) => {
-    try {
-      console.log(`Logging in user with email: ${username}`);
-      const res = await axios.post(`${BASE_URL}/login`, {
-        username, password
-      });
-      console.log(`Login response:`, res.data);
+const login = async (username: string, password: string) => {
+  try {
+    console.log(`Attempting login for user: ${username}`);
+
+    const response = await axios.post(`${BASE_URL}/login`, { username, password });
+
+    console.log('Login response:', response.data);
+
+    if (response.data && response.data.access_token) {
+      await AsyncStorage.setItem('accessToken', response.data.access_token);
+
+      if (response.data.refresh_token) {
+        await AsyncStorage.setItem('refreshToken', response.data.refresh_token);
+      }
+
+      // Store user information
+      await AsyncStorage.setItem('userId', response.data.user_id.toString());
+      await AsyncStorage.setItem('username', username);
+
+      // Update authentication state
       setAuthValue(`Logged in as ${username}`);
       setIsAuthenticated(true);
-      return res.data;
-    } catch (error) {
-      console.error('Login failed', handleAxiosError(error));
-      throw error;
+
+      // Return user data (excluding sensitive information like tokens)
+      return {
+        userId: response.data.user_id,
+        username: username,
+        // Add any other non-sensitive user data here
+      };
+    } else {
+      throw new Error('Login failed: No access token received');
     }
-  };
+  } catch (error) {
+    console.error('Login failed', handleAxiosError(error));
+    setIsAuthenticated(false);
+    setAuthValue(null);
+    throw error;
+  }
+};
 
   const logout = async () => {
     try {

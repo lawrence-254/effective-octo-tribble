@@ -1,9 +1,13 @@
 import {View, Text} from 'react-native'
+import {ManageCategory} from '../../components/category/Categories'
+import {JournalEntries} from '../../components/journal/Journal'
+
 
 const Journal =()=>{
     return (
         <View>
-        <Text>Jurnal</Text>
+
+        <ManageCategory/>
         </View>
     )
 }

@@ -1,20 +1,20 @@
 from flask import render_template, redirect, url_for, flash, session, jsonify, request
 from werkzeug.security import generate_password_hash, check_password_hash
-from app import app, db, csrf
+from app import app, db, csrf,CORS,cross_origin
 from app.forms import RegisterForm, LoginForm, ResetUsernameForm, ResetEmailForm, ResetPasswordForm, JournalEntryForm, CategoryForm
 from app.models import User, Category, JournalEntry
 from app.utils import login_required
+from flask_jwt_extended import create_access_token, create_refresh_token
 
 
-@app.route('/api/v1/get-csrf-token', methods=['GET'])
-def get_csrf_token():
-    try:
-        token = generate_csrf()
-        session['_csrf_token'] = token
-        return jsonify({'csrf_token': token})
-    except Exception as e:
-        app.logger.error(f"Error generating CSRF token: {e}")
-        return jsonify({'error': 'Failed to generate CSRF token'}), 500
+
+@app.after_request
+def add_cors_headers(response):
+    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8081'
+    response.headers['Access-Control-Allow-Credentials'] = 'true'
+    if 'Set-Cookie' in response.headers:
+        response.headers['Set-Cookie'] += '; SameSite=None; Secure'
+    return response
 
 @app.route('/api/v1/')
 @app.route('/api/v1/index')
@@ -50,13 +50,19 @@ def register():
             return jsonify({'error': 'User already exists.', 'details': str(e)}), 400
     return jsonify({'error': 'Invalid data submitted.', 'errors': form.errors}), 400
 
-@app.route('/api/v1/login', methods=['POST'])
+@app.route('/login', methods=['POST', 'OPTIONS'])
+@cross_origin(supports_credentials=True)
 def login():
+    if request.method == "OPTIONS":
+        return jsonify({}), 200
     if 'user_id' in session:
-        return jsonify({'message': 'Already logged in.'}), 200
+        return jsonify({'message': 'Already logged in.', 'user_id': session['user_id']}), 200
 
     data = request.get_json()
-    print("Received data:", data)
+
+    if not data:
+        return jsonify({'error': 'No data provided.'}), 400
+
     username = data.get('username')
     password = data.get('password')
 
@@ -64,10 +70,22 @@ def login():
         return jsonify({'error': 'Username and password are required.'}), 400
 
     user = User.query.filter_by(username=username).first()
+
     if user and check_password_hash(user.hashed_password, password):
         session['user_id'] = user.id
         session['username'] = user.username
-        return jsonify({'message': 'Login successful!'}), 200
+
+        # Create JWT tokens
+        access_token = create_access_token(identity=user.id)
+        refresh_token = create_refresh_token(identity=user.id)
+
+        return jsonify({
+            'message': 'Login successful!',
+            'user_id': user.id,
+            'username': user.username,
+            'access_token': access_token,
+            'refresh_token': refresh_token
+        }), 200
     else:
         return jsonify({'error': 'Invalid username or password.'}), 401
 
@@ -112,6 +130,7 @@ def reset_password():
     return jsonify({'error': 'Invalid data submitted.'}), 400
 
 @app.route('/api/v1/categories', methods=['GET', 'POST'])
+@csrf.exempt
 @login_required
 def manage_categories():
     if request.method == 'POST':
@@ -128,6 +147,7 @@ def manage_categories():
         return jsonify([category.serialize() for category in categories]), 200
 
 @app.route('/api/v1/categories/<int:category_id>/delete', methods=['DELETE'])
+@csrf.exempt
 @login_required
 def delete_category(category_id):
     category = Category.query.get_or_404(category_id)

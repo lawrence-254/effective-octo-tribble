@@ -38,6 +38,7 @@ class ResetUsernameForm(FlaskForm):
     new_username = StringField('New Username', validators=[DataRequired(), Length(min=6, max=12)])
     submit = SubmitField('Reset Username')
 
+
 '''
 reset email class form
 '''
@@ -66,6 +67,11 @@ includes:
 class CategoryForm(FlaskForm):
     name = StringField('Category', validators=[DataRequired()])
     submit=SubmitField('Enter Category')
+    def serialize(self):
+        return {
+            'id': self.id,
+            'name': self.name
+        }
 
 '''journal form class'''
 class JournalEntryForm(FlaskForm):

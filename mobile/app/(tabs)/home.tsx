@@ -1,14 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Link } from 'expo-router';
+
 
 
 const BASE_URL = 'http://localhost:5000/api/v1';
+
+const Empty = ()=>{
+    return(
+        <View>
+        <Text>
+        You have not added any journals, Kindly go to
+        <Link href="/journal" style={styles.link}>
+        <Text style={styles.linkText}>Journals</Text>
+        </Link>
+        to get started.
+        </Text>
+        </View>
+        )}
 
 const Homepage: React.FC = () => {
     const [data, setData] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const token = localStorage.getItem('authToken');
 
     const fetchData = async () => {
         try {
@@ -16,6 +32,7 @@ const Homepage: React.FC = () => {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
                 },
             });
 
@@ -46,7 +63,11 @@ const Homepage: React.FC = () => {
 
     return (
        <SafeAreaView style={styles.safeArea}>
-
+       <View>
+               if (data===null|| !data ){
+                   <Empty/>
+                   }
+               </View>
        <FlatList
        data={[{id:1}, {id:2}, {id:3}, {id:4},{id:5}]}
        keyExtractor={(item) => item.id.toString()}
@@ -62,6 +83,7 @@ const Homepage: React.FC = () => {
         <View>
         <Text style={styles.title}>Welcome Back To Your Journal</Text>
         </View>
+
         </View>
         </View>
     )}
@@ -90,6 +112,18 @@ const styles = StyleSheet.create({
         fontSize: 18,
         marginBottom: 10,
     },
+  link: {
+    padding: 15,
+    backgroundColor: '#008B8B',
+    borderRadius: 5,
+    alignItems: 'center',
+    width: '28%',
+  },
+  linkText: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    color: '#014E4E',
+  },
 });
 
 export default Homepage;
